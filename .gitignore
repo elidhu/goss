@@ -3,3 +3,4 @@
 test/
 goss
 .envrc
+dist/
