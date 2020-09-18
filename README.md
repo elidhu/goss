@@ -80,4 +80,11 @@ goss list / --json | jq '.[].Name' | xargs -n1 goss delete -n
 ```
 
 ## Why?
-I made this tool because although **chamber** is an excellent tool - it uses **viper** underneath and the problem with **viper** is that the keys are **CASE INSENSITIVE** which for me was unacceptable. So I decided to roll-my-own using the wonderful [**koanf**](https://github.com/knadh/koanf) library to manage the deserialisation of various config files.
+I made this tool because although **chamber** is an excellent tool - it uses **viper** underneath and the problem with **viper** is that the keys are **CASE INSENSITIVE** which for me was unacceptable. So I decided to *roll-my-own* using the wonderful [**koanf**](https://github.com/knadh/koanf) library to manage the deserialisation of various config files.
+
+## Acknowledgements
+- [koanf](https://github.com/knadh/koanf): For being the solution to the problems I had.
+- [chamber](https://github.com/segmentio/chamber): For being the inspiration.
+- [cobra](https://github.com/spf13/cobra): For being an awesome CLI tool library.
+
+[Buy me a ☕!](https://www.paypal.me/kevinglasson)
