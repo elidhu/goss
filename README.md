@@ -1,6 +1,6 @@
-![logo](https://user-images.githubusercontent.com/22187575/93597198-3f224f80-f9ed-11ea-8b6a-fa3aec24f133.png)
+![Logo](https://user-images.githubusercontent.com/22187575/93653012-a968dd80-fa49-11ea-947a-537a91282ab2.png)
 
-**Goss** is a tool for managing AWS SSM parameters from the CLI. It was mainly developed to managed batches of secrets for application deployment and infrastructure.
+**goss** is a tool for managing AWS SSM parameters from the CLI. It was mainly developed to manage batches of secrets / parameters stored in local env files for application and infrastructure deployment.
 
 ## Installation
 Not sure yet? this is day 3 of golang!
@@ -13,8 +13,19 @@ Authentication with AWS is pretty standard as this uses the AWS go SDK. Do a goo
 
 It is advised to use **goss** in conjuction with **aws-vault** so that your credentials are stored encrypted locally and you just inject them each time you run **goss**, like so.
 
-```
+```bash
 aws-vault exec prod -- goss
+```
+
+### Tip
+if you are going to run multiple goss commands in a sessions you can start a shell that holds your credentials with.
+
+```bash
+# This will put your AWS credentials into the environment
+aws-vault exec prod -- bash
+
+# Now proceed to use goss without the aws-vault... prefix
+goss list /
 ```
 
 ## Usage
