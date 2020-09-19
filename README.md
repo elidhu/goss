@@ -83,11 +83,10 @@ goss list -p /dev/test-env -r
 +------------------------+--------------------------------------+---------+----------------------+
 ```
 #### JSON
-```
 ```bash
 goss list -p /dev/test-env -r --json
 ```
-```
+```json
 [
   {
     "ARN": "arn:aws:ssm:ap-southeast-2:XXXXXXXXXXXX:parameter/dev/test-env/COMMENT",
@@ -114,7 +113,7 @@ goss put -n /test/param -v somevalue -t SecureString
 
 ### Delete
 Delete a single named parameter from the store. Note that the name, `-n` is the full path to the parameter.
-```
+```bash
 goss delete -n /test/param
 ```
 
@@ -130,8 +129,8 @@ Import allows reading a file into the parameter store.
 - All parameters from the file must be stored as the same type i.e. String or SecretString etc.
 - Currently only .env key-values files are supported. **However** the parsers are already accessible in the code for the other 3 major formats - I just need create a flag to allow a choice of input format.
 
-```
-goss import -f test.env -t SecureString
+```bash
+goss import -f test.env -p /envs/dev -t SecureString
 ```
 
 #### File format support
