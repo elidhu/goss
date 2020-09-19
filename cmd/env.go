@@ -26,109 +26,177 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"os/signal"
+	"runtime"
+	"strings"
+	"syscall"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/spf13/cobra"
 )
 
-// envCmd represents the env command
-var envCmd = &cobra.Command{
-	Use:   "env",
-	Short: "A brief description of your command",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("env called")
-	},
-}
+var (
+	// For flags.
+	envPath string
+
+	// envCmd represents the env command.
+	envCmd = &cobra.Command{
+		Use:   "env",
+		Short: "Load parameters into the environment and run a command",
+		Args:  cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("env called")
+			envRun(args[0], args[1:], envPath)
+		},
+	}
+)
 
 func init() {
-	// rootCmd.AddCommand(envCmd)
+	rootCmd.AddCommand(envCmd)
 
-	// Here you will define your flags and configuration settings.
+	envCmd.Flags().StringVarP(
+		&envPath, "path", "p", "", "parameter path",
+	)
+	envCmd.MarkFlagRequired("path")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// envCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// envCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// func execEnvironment(input ExecCommandInput, config *vault.Config, creds *credentials.Credentials) error {
-// 	val, err := creds.Get()
-// 	if err != nil {
-// 		return fmt.Errorf("Failed to get credentials for %s: %w", input.ProfileName, err)
-// 	}
+func envRun(command string, args []string, path string) error {
+	fmt.Printf("Command: %s\nArgs: %s\nPath: %s\n", command, args, path)
 
-// 	env := environ(os.Environ())
-// 	env = updateEnvForAwsVault(env, input.ProfileName, config.Region)
+	// Fetch the parameters.
+	env := environ(os.Environ())
+	mp, err := getParameters(path)
+	if err != nil {
+		return fmt.Errorf("Failed to get parameters: %w", err)
+	}
 
-// 	log.Println("Setting subprocess env: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY")
-// 	env.Set("AWS_ACCESS_KEY_ID", val.AccessKeyID)
-// 	env.Set("AWS_SECRET_ACCESS_KEY", val.SecretAccessKey)
+	// Set the parameters in the environment.
+	for k, v := range mp {
+		env.Set(k, v)
+	}
 
-// 	if val.SessionToken != "" {
-// 		log.Println("Setting subprocess env: AWS_SESSION_TOKEN, AWS_SECURITY_TOKEN")
-// 		env.Set("AWS_SESSION_TOKEN", val.SessionToken)
-// 		env.Set("AWS_SECURITY_TOKEN", val.SessionToken)
-// 	}
-// 	if expiration, err := creds.ExpiresAt(); err == nil {
-// 		log.Println("Setting subprocess env: AWS_SESSION_EXPIRATION")
-// 		env.Set("AWS_SESSION_EXPIRATION", iso8601.Format(expiration))
-// 	}
+	if !supportsExecSyscall() {
+		return execCmd(command, args, env)
+	}
 
-// 	if !supportsExecSyscall() {
-// 		return execCmd(input.Command, input.Args, env)
-// 	}
+	return execSyscall(command, args, env)
+}
 
-// 	return execSyscall(input.Command, input.Args, env)
-// }
+// getParameters is a virtual copy of listParameters - it needs to be refactored
+func getParameters(
+	path string,
+) (map[string]string, error) {
+	// Create Session.
+	sess, err := session.NewSession()
+	if err != nil {
+		return nil, fmt.Errorf("Session error: %w", err)
+	}
 
-// func execCmd(command string, args []string, env []string) error {
-// 	log.Printf("Starting child process: %s %s", command, strings.Join(args, " "))
+	// Create SSM service.
+	svc := ssm.New(sess)
 
-// 	cmd := exec.Command(command, args...)
-// 	cmd.Stdin = os.Stdin
-// 	cmd.Stdout = os.Stdout
-// 	cmd.Stderr = os.Stderr
-// 	cmd.Env = env
+	// Retrieve parameters
+	res, err := svc.GetParametersByPath(
+		&ssm.GetParametersByPathInput{
+			Path:           aws.String(path),
+			WithDecryption: aws.Bool(true),
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("SSM request error: %w", err)
+	}
 
-// 	sigChan := make(chan os.Signal, 1)
-// 	signal.Notify(sigChan)
+	mp := make(map[string]string)
+	for _, v := range res.Parameters {
+		ss := strings.Split(*v.Name, "/")
+		key := ss[len(ss)-1]
+		if key != "" {
+			mp[key] = *v.Value
+		}
+	}
 
-// 	if err := cmd.Start(); err != nil {
-// 		return err
-// 	}
+	return mp, nil
+}
 
-// 	go func() {
-// 		for {
-// 			sig := <-sigChan
-// 			cmd.Process.Signal(sig)
-// 		}
-// 	}()
+func supportsExecSyscall() bool {
+	return runtime.GOOS == "linux" || runtime.GOOS == "darwin" || runtime.GOOS == "freebsd"
+}
 
-// 	if err := cmd.Wait(); err != nil {
-// 		cmd.Process.Signal(os.Kill)
-// 		return fmt.Errorf("Failed to wait for command termination: %v", err)
-// 	}
+func execCmd(command string, args []string, env []string) error {
+	log.Printf("Starting child process: %s %s", command, strings.Join(args, " "))
 
-// 	waitStatus := cmd.ProcessState.Sys().(syscall.WaitStatus)
-// 	os.Exit(waitStatus.ExitStatus())
-// 	return nil
-// }
+	cmd := exec.Command(command, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = env
 
-// func execSyscall(command string, args []string, env []string) error {
-// 	log.Printf("Exec command %s %s", command, strings.Join(args, " "))
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan)
 
-// 	argv0, err := exec.LookPath(command)
-// 	if err != nil {
-// 		return fmt.Errorf("Couldn't find the executable '%s': %w", command, err)
-// 	}
+	if err := cmd.Start(); err != nil {
+		return err
+	}
 
-// 	log.Printf("Found executable %s", argv0)
+	go func() {
+		for {
+			sig := <-sigChan
+			cmd.Process.Signal(sig)
+		}
+	}()
 
-// 	argv := make([]string, 0, 1+len(args))
-// 	argv = append(argv, command)
-// 	argv = append(argv, args...)
+	if err := cmd.Wait(); err != nil {
+		cmd.Process.Signal(os.Kill)
+		return fmt.Errorf("Failed to wait for command termination: %v", err)
+	}
 
-// 	return syscall.Exec(argv0, argv, env)
-// }
+	waitStatus := cmd.ProcessState.Sys().(syscall.WaitStatus)
+	os.Exit(waitStatus.ExitStatus())
+	return nil
+}
+
+func execSyscall(command string, args []string, env []string) error {
+	log.Printf("Exec command %s %s", command, strings.Join(args, " "))
+
+	argv0, err := exec.LookPath(command)
+	if err != nil {
+		return fmt.Errorf("Couldn't find the executable '%s': %w", command, err)
+	}
+
+	log.Printf("Found executable %s", argv0)
+
+	argv := make([]string, 0, 1+len(args))
+	argv = append(argv, command)
+	argv = append(argv, args...)
+
+	return syscall.Exec(argv0, argv, env)
+}
+
+// environ is a slice of strings representing the environment, in the form "key=value".
+type environ []string
+
+// Unset an environment variable by key
+func (e *environ) Unset(key string) {
+	for i := range *e {
+		// If we found the key
+		if strings.HasPrefix((*e)[i], key+"=") {
+			// Move the last value to replace the key
+			(*e)[i] = (*e)[len(*e)-1]
+			// Slice of the last value as we moved it to 'i'
+			*e = (*e)[:len(*e)-1]
+			break
+		}
+	}
+}
+
+// Set adds an environment variable, replacing any existing ones of the same key
+func (e *environ) Set(key, val string) {
+	e.Unset(key)
+	*e = append(*e, key+"="+val)
+}
