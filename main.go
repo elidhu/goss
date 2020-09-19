@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "goss/cmd"
+import "github.com/kevinglasson/goss/cmd"
 
 func main() {
 	cmd.Execute()

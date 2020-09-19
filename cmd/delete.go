@@ -17,7 +17,6 @@ var (
 		Use:   "delete",
 		Short: "Delete parameters from SSM",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("delete called")
 			deleteParameters(&names)
 		},
 	}
