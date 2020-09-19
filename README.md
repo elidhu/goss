@@ -7,8 +7,9 @@
 - [Installation](#installation)
   - [Using go get](#using-go-get)
   - [Pre-built binaries](#pre-built-binaries)
-- [AWS auth](#aws-auth)
-  - [Tip](#tip)
+- [Authentication](#authentication)
+  - [Manual](#manual)
+  - [Using aws-vault](#using-aws-vault)
 - [Usage](#usage)
   - [List](#list)
     - [Default](#default)
@@ -22,32 +23,42 @@
 - [Acknowledgements](#acknowledgements)
 ## Installation
 ### Using go get
+To install use `go get` with or without -u to have goss installed in your `$GOBIN`.
 ```
 go get -u github.com/kevinglasson/goss
 ```
+To remove after installing with `go get` run the following command - this will NOT remove the source code from `$GOPATH/src/...`
+```
+go clean -i github.com/kevinglasson/goss
+```
 ### Pre-built binaries
-Download the appropriate binary for your system from the releases page.
+Download the appropriate binary for your system from the [releases](https://github.com/kevinglasson/goss/releases) page.
 
-## AWS auth
-Authentication with AWS is pretty standard as this uses the AWS go SDK. Do a google search if you need more information. The places that the SDK looks for credentials are:
-- Environment
-- `~/.aws/config`
-- `~/.aws/credentials`
+## Authentication
+### Manual
+Authentication with AWS is pretty standard as this uses the AWS go SDK. More information can be found [here](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html). The gist of it is:
 
-It is advised to use **goss** in conjuction with **aws-vault** so that your credentials are stored encrypted locally and you just inject them each time you run **goss**, like so.
+A region must be set in one of these ways:
+- Set the AWS_REGION environment variable to the default Region
+- Set the AWS_SDK_LOAD_CONFIG environment variable to true to get the Region value from the config file in the `.aws/config`
+
+The places that the SDK looks for credentials are:
+- Environment vairables
+- Shared credentials file
+
+### Using aws-vault
+It is advised to use **goss** in conjuction with **aws-vault** so that your credentials are stored encrypted locally and you just inject them each time you run **goss**, like so:
 
 ```bash
 aws-vault exec prod -- goss
 ```
-
-### Tip
-if you are going to run multiple goss commands in a sessions you can start a shell that holds your credentials with.
+if you are going to run multiple goss commands in a session you can start a shell that holds your credentials with:
 
 ```bash
-# This will put your AWS credentials into the environment
+# This will put your AWS credentials / region etc. into the environment
 aws-vault exec prod -- bash
 
-# Now proceed to use goss without the aws-vault... prefix
+# Now proceed to use goss without the aws-vault prefix
 goss list -p /
 ```
 
