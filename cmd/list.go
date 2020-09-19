@@ -3,8 +3,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"goss/internal/utils"
 	"os"
+	"strconv"
+	"time"
+
+	"github.com/kevinglasson/goss/internal/utils"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -16,18 +19,14 @@ import (
 // listCmd represents the list command.
 var (
 	// For flags.
+	path      string
 	recursive bool
 	decrypt   bool
 
 	listCmd = &cobra.Command{
-		Use:       "list PATH",
-		Short:     "List parameters in SSM by path",
-		Args:      cobra.ExactArgs(1),
-		ValidArgs: []string{"path"},
+		Use:   "list",
+		Short: "List parameters SSM",
 		Run: func(cmd *cobra.Command, args []string) {
-			// Guaranteed to work because of ExactArgs.
-			path := args[0]
-
 			// Global flags.
 			asJSON, err := cmd.Flags().GetBool("json")
 			if err != nil {
@@ -46,7 +45,13 @@ var (
 func init() {
 	rootCmd.AddCommand(listCmd)
 
-	listCmd.Flags().BoolVarP(&recursive, "recursive", "r", false, "recurse into parameter path")
+	listCmd.Flags().StringVarP(
+		&path, "path", "p", "", "parameter(s) path",
+	)
+	listCmd.MarkFlagRequired("path")
+	listCmd.Flags().BoolVarP(
+		&recursive, "recursive", "r", false, "recurse into parameter path",
+	)
 	listCmd.Flags().BoolVarP(&decrypt, "decrypt", "d", false, "decrypt values")
 }
 
@@ -86,13 +91,17 @@ func listParameters(
 		fmt.Println(string(out))
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Value"})
+		table.SetHeader([]string{"Name", "Value", "Version", "Last Mod"})
 
 		for _, v := range res.Parameters {
 			table.Append(
 				[]string{
 					utils.TruncateString(*v.Name, 35),
 					utils.TruncateString(*v.Value, 35),
+					utils.TruncateString(strconv.FormatInt(*v.Version, 10), 35),
+					utils.TruncateString(
+						v.LastModifiedDate.Format(time.RFC3339), 35,
+					),
 				},
 			)
 		}

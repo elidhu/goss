@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"goss/internal/utils"
+
+	"github.com/kevinglasson/goss/internal/utils"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -19,7 +20,7 @@ var (
 
 	putCmd = &cobra.Command{
 		Use:   "put",
-		Short: "Put a parameter (or a file of them) into SSM",
+		Short: "Put a single parameter into SSM",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// Run and report errors.
@@ -34,11 +35,11 @@ var (
 func init() {
 	rootCmd.AddCommand(putCmd)
 
-	putCmd.Flags().StringVarP(&name, "name", "n", "", "full path name of the parameter")
+	putCmd.Flags().StringVarP(&name, "name", "n", "", "parameter name including path")
 	putCmd.MarkFlagRequired("name")
-	putCmd.Flags().StringVarP(&value, "value", "v", "", "value of the parameter")
+	putCmd.Flags().StringVarP(&value, "value", "v", "", "parameter value")
 	putCmd.MarkFlagRequired("value")
-	putCmd.Flags().StringVarP(&putType, "type", "t", "", "type of the parameter")
+	putCmd.Flags().StringVarP(&putType, "type", "t", "", "parameter type")
 	putCmd.MarkFlagRequired("type")
 	putCmd.Flags().BoolVarP(
 		&putOWrite, "overwrite", "o", false, "overwrite parameter if it exists",

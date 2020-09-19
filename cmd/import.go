@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"goss/internal/utils"
+
+	"github.com/kevinglasson/goss/internal/utils"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -16,6 +17,7 @@ var (
 	// For flags
 	file         string
 	importType   string
+	importPath   string
 	importOWrite bool
 
 	// importCmd represents the import command
@@ -23,7 +25,7 @@ var (
 		Use:   "import",
 		Short: "Import a file into SSM at the given path",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := importParameters(file, importType, importOWrite)
+			err := importParameters(file, importType, importPath, importOWrite)
 			if err != nil {
 				utils.PrintErrorAndExit(err)
 			}
@@ -41,13 +43,16 @@ func init() {
 	importCmd.Flags().StringVarP(
 		&importType, "type", "t", "", "type of the parameter",
 	)
+	importCmd.Flags().StringVarP(
+		&importPath, "path", "p", "", "path to prefix parameters",
+	)
 	importCmd.MarkFlagRequired("type")
 	importCmd.Flags().BoolVarP(
 		&importOWrite, "overwrite", "o", false, "overwrite parameters if they exist",
 	)
 }
 
-func importParameters(file string, typ string, overwrite bool) error {
+func importParameters(file string, typ string, path string, overwrite bool) error {
 
 	provider := kfile.Provider(file)
 	parser := kdotenv.Parser()
@@ -80,7 +85,7 @@ func importParameters(file string, typ string, overwrite bool) error {
 		// Retrieve parameters
 		_, err = svc.PutParameter(
 			&ssm.PutParameterInput{
-				Name:      aws.String(k),
+				Name:      aws.String(fmt.Sprintf("%s/%s", path, k)),
 				Value:     aws.String(v.(string)),
 				Type:      aws.String(typ),
 				Overwrite: aws.Bool(overwrite),
