@@ -39,8 +39,8 @@ Download the appropriate binary for your system from the [releases](https://gith
 Authentication with AWS is pretty standard as this uses the AWS go SDK. More information can be found [here](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html). The gist of it is:
 
 A region must be set in one of these ways:
-- Set the AWS_REGION environment variable to the default Region
-- Set the AWS_SDK_LOAD_CONFIG environment variable to true to get the Region value from the config file in the `.aws/config`
+- Set the `AWS_REGION` environment variable to the default Region
+- Set the `AWS_SDK_LOAD_CONFIG` environment variable to true to get the Region value from the config file in the `.aws/config`
 
 The places that the SDK looks for credentials are:
 - Environment vairables
@@ -130,7 +130,7 @@ goss list -p /dev/test-env -r --json
     "Value": "AQICAHhEgSOjHIIiYIkJp/zSBm7c5cy7...",
     "Version": 1
   },
-  ...
+  //...
 ]
 
 ```
@@ -158,7 +158,7 @@ goss list -p / --json | jq '.[].Name' | xargs -n1 goss delete -n
 Import allows reading a file into the parameter store.
 
 - All parameters from the file must be stored as the same type i.e. String or SecretString etc.
-- Currently only .env key-values files are supported. **However** the parsers are already accessible in the code for the other 3 major formats - I just need create a flag to allow a choice of input format.
+- Currently only `dotenv` key-value style files are supported. **However** the parsers are already accessible in the code for the other 3 major formats - I just need create a flag to allow a choice of input format.
 
 ```bash
 goss import -f test.env -p /envs/dev -t SecureString
