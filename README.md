@@ -2,6 +2,24 @@
 
 **goss** is a tool for managing AWS SSM parameters from the CLI. It was mainly developed to manage batches of secrets / parameters stored in local env files for application and infrastructure deployment.
 
+## Contents
+- [Contents](#contents)
+- [Installation](#installation)
+  - [Using go get](#using-go-get)
+  - [Pre-built binaries](#pre-built-binaries)
+- [AWS auth](#aws-auth)
+  - [Tip](#tip)
+- [Usage](#usage)
+  - [List](#list)
+    - [Default](#default)
+    - [JSON](#json)
+  - [Put](#put)
+  - [Delete](#delete)
+    - [Obligatory fancy jq pipe](#obligatory-fancy-jq-pipe)
+  - [Import](#import)
+    - [File format support](#file-format-support)
+- [Why?](#why)
+- [Acknowledgements](#acknowledgements)
 ## Installation
 ### Using go get
 ```
@@ -35,26 +53,28 @@ goss list -p /
 
 ## Usage
 ```
-For importing and exporting secrets to AWS SSM from a local file for
-use in AWS applications
+goss is used to interact with the AWS SSM Parameter Store in a
+variety of helpful ways.
 
-Inspired by another cli tool 'chamber' but with AWS SSM support only. This is to
-facillitate syncing path based secrets from TOML files to AWS SSM.
+You can interact in bulk through the 'import' sub-command to import parameters
+directly from a local file.
+
+You can also interact with paths individually to list, put and delete
+parameters.
 
 Usage:
   goss [command]
 
 Available Commands:
-  delete      Delete parameters from SSM
+  delete      Delete parameters
   help        Help about any command
-  import      Import a file into SSM at the given path
-  list        List parameters in SSM by path
-  put         Put a parameter (or a file of them) into SSM
+  import      Import parameters from a file
+  list        List parameters
+  put         Put a parameter
 
 Flags:
-      --config string   config file (default is $HOME/.goss.toml)
-  -h, --help            help for goss
-      --json            output as json
+  -h, --help   help for goss
+      --json   output as json
 
 Use "goss [command] --help" for more information about a command.
 ```

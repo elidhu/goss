@@ -23,7 +23,7 @@ var (
 	// importCmd represents the import command
 	importCmd = &cobra.Command{
 		Use:   "import",
-		Short: "Import a file into SSM at the given path",
+		Short: "Import parameters from a file",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := importParameters(file, importType, importPath, importOWrite)
 			if err != nil {
@@ -37,14 +37,14 @@ func init() {
 	rootCmd.AddCommand(importCmd)
 
 	importCmd.Flags().StringVarP(
-		&file, "file", "f", "", "absolute path to the file",
+		&file, "file", "f", "", "path to the file",
 	)
 	importCmd.MarkFlagRequired("file")
 	importCmd.Flags().StringVarP(
-		&importType, "type", "t", "", "type of the parameter",
+		&importType, "type", "t", "", "parameter type",
 	)
 	importCmd.Flags().StringVarP(
-		&importPath, "path", "p", "", "path to prefix parameters",
+		&importPath, "path", "p", "", "parameter path",
 	)
 	importCmd.MarkFlagRequired("type")
 	importCmd.Flags().BoolVarP(

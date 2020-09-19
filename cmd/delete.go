@@ -15,7 +15,7 @@ var (
 
 	deleteCmd = &cobra.Command{
 		Use:   "delete",
-		Short: "Delete parameters from SSM",
+		Short: "Delete parameters",
 		Run: func(cmd *cobra.Command, args []string) {
 			deleteParameters(&names)
 		},
@@ -25,7 +25,7 @@ var (
 func init() {
 	rootCmd.AddCommand(deleteCmd)
 
-	deleteCmd.Flags().StringSliceVarP(&names, "names", "n", []string{}, "")
+	deleteCmd.Flags().StringSliceVarP(&names, "names", "n", []string{}, "parameter names")
 	deleteCmd.MarkFlagRequired("names")
 }
 

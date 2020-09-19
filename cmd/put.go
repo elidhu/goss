@@ -20,7 +20,7 @@ var (
 
 	putCmd = &cobra.Command{
 		Use:   "put",
-		Short: "Put a single parameter into SSM",
+		Short: "Put a parameter",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// Run and report errors.

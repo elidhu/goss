@@ -25,7 +25,7 @@ var (
 
 	listCmd = &cobra.Command{
 		Use:   "list",
-		Short: "List parameters SSM",
+		Short: "List parameters",
 		Run: func(cmd *cobra.Command, args []string) {
 			// Global flags.
 			asJSON, err := cmd.Flags().GetBool("json")
@@ -46,7 +46,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	listCmd.Flags().StringVarP(
-		&path, "path", "p", "", "parameter(s) path",
+		&path, "path", "p", "", "parameter path",
 	)
 	listCmd.MarkFlagRequired("path")
 	listCmd.Flags().BoolVarP(
