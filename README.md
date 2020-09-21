@@ -47,12 +47,17 @@ The places that the SDK looks for credentials are:
 - Shared credentials file
 
 ### Using aws-vault
-It is advised to use **goss** in conjuction with **aws-vault** so that your credentials are stored encrypted locally and you just inject them each time you run **goss**, like so:
-
+It is advised to use **goss** in conjuction with **aws-vault** so that your credentials are stored encrypted locally and you just inject them each time you run **goss**. E.g. to run with your 'prod' profile:
 ```bash
 aws-vault exec prod -- goss
 ```
-if you are going to run multiple goss commands in a session you can start a shell that holds your credentials with:
+
+It may also be useful to alias this command in some useful way so that it isn't so painful to write out every time!
+```bash
+alias gprod='aws-vault exec prod -- goss'
+```
+
+If you are going to run multiple goss commands in a session you can start a shell that holds your credentials with:
 
 ```bash
 # This will put your AWS credentials / region etc. into the environment
@@ -152,7 +157,7 @@ goss delete -n /test/param
 Just some fanciness showing interop with other Unix tools, such as the popular **jq**. This will use **goss** to list the parameters in the store, output as json, filter to the names and pass them to **goss** again to delete.
 
 ```bash
-goss list -p / --json | jq '.[].Name' | xargs -n1 goss delete -n
+goss list -p / --json | jq '.[].Name' | xargs -n1 -- goss delete -n
 ```
 ### Import
 Import allows reading a file into the parameter store.
