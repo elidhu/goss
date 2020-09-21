@@ -16,13 +16,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command.
 var (
 	// For flags.
 	path      string
 	recursive bool
 	decrypt   bool
 
+	// listCmd represents the list command.
 	listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "List parameters",
@@ -61,13 +61,13 @@ func listParameters(
 	decrypt bool,
 	asJSON bool,
 ) error {
-	// Create Session
+	// Create Session.
 	sess, err := session.NewSession()
 	if err != nil {
 		return fmt.Errorf("Session error: %w", err)
 	}
 
-	// Create SSM service
+	// Create SSM service.
 	svc := ssm.New(sess)
 
 	// Retrieve parameters

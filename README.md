@@ -4,6 +4,7 @@
 
 ## Contents
 - [Contents](#contents)
+- [Demo](#demo)
 - [Installation](#installation)
   - [Using go get](#using-go-get)
   - [Pre-built binaries](#pre-built-binaries)
@@ -21,6 +22,9 @@
     - [File format support](#file-format-support)
 - [Why?](#why)
 - [Acknowledgements](#acknowledgements)
+
+## Demo
+[![asciicast](https://asciinema.org/a/GTP4YjvB3TWdcOSPD9swooZGa.svg)](https://asciinema.org/a/GTP4YjvB3TWdcOSPD9swooZGa)
 ## Installation
 ### Using go get
 To install use `go get` with or without -u to have goss installed in your `$GOBIN`.
