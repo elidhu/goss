@@ -101,10 +101,11 @@ func getParameters(
 	// Create SSM service.
 	svc := ssm.New(sess)
 
-	// Retrieve parameters
+	// Retrieve parameters.
 	res, err := svc.GetParametersByPath(
 		&ssm.GetParametersByPathInput{
 			Path:           aws.String(path),
+			Recursive:      aws.Bool(true),
 			WithDecryption: aws.Bool(true),
 		},
 	)
@@ -112,6 +113,7 @@ func getParameters(
 		return nil, fmt.Errorf("SSM request error: %w", err)
 	}
 
+	// Put the variables into a k-v map.
 	mp := make(map[string]string)
 	for _, v := range res.Parameters {
 		ss := strings.Split(*v.Name, "/")
@@ -162,14 +164,10 @@ func execCmd(command string, args []string, env []string) error {
 }
 
 func execSyscall(command string, args []string, env []string) error {
-	log.Printf("Exec command %s %s", command, strings.Join(args, " "))
-
 	argv0, err := exec.LookPath(command)
 	if err != nil {
 		return fmt.Errorf("Couldn't find the executable '%s': %w", command, err)
 	}
-
-	log.Printf("Found executable %s", argv0)
 
 	argv := make([]string, 0, 1+len(args))
 	argv = append(argv, command)
