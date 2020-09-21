@@ -2,9 +2,10 @@
 
 **goss** is a tool for managing AWS SSM parameters from the CLI. It was mainly developed to manage batches of secrets / parameters stored in local env files for application and infrastructure deployment.
 
+![](examples/demo1.svg)
+
 ## Contents
 - [Contents](#contents)
-- [Demo](#demo)
 - [Installation](#installation)
   - [Using go get](#using-go-get)
   - [Pre-built binaries](#pre-built-binaries)
@@ -23,8 +24,6 @@
 - [Why?](#why)
 - [Acknowledgements](#acknowledgements)
 
-## Demo
-[![asciicast](https://asciinema.org/a/GTP4YjvB3TWdcOSPD9swooZGa.svg)](https://asciinema.org/a/GTP4YjvB3TWdcOSPD9swooZGa)
 ## Installation
 ### Using go get
 To install use `go get` with or without -u to have goss installed in your `$GOBIN`.
