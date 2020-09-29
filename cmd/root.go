@@ -17,12 +17,12 @@ var (
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
 		Use:   "goss",
-		Short: "goss in an AWS SSM Paramter Store manager",
+		Short: "goss is an AWS SSM Parameter Store manager",
 		Long: `goss is used to interact with the AWS SSM Parameter Store in a
 variety of helpful ways.
 
 You can interact in bulk through the 'import' sub-command to import parameters
-directly from a local file.
+directly from a local file in many common formats.
 
 You can also interact with paths individually to list, put and delete
 parameters.

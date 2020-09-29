@@ -85,7 +85,9 @@ Usage:
   goss [command]
 
 Available Commands:
+  completion  Generate completion script
   delete      Delete parameters
+  env         Load parameters into the environment and run a command
   help        Help about any command
   import      Import parameters from a file
   list        List parameters
@@ -166,19 +168,28 @@ goss list -p / --json | jq '.[].Name' | xargs -n1 -- goss delete -n
 Import allows reading a file into the parameter store.
 
 - All parameters from the file must be stored as the same type i.e. String or SecretString etc.
-- Currently only `dotenv` key-value style files are supported. **However** the parsers are already accessible in the code for the other 3 major formats - I just need create a flag to allow a choice of input format.
+- Multiple file formats are supported through the `--format` which is by default set to `dotenv`. Other supported formats include `json`, `toml` and `yaml`. See the table below for an overview.
+- **Only flat data structures are supported currently**
+
+#### File format support
+| File format | Currently supported |
+| :---------: | :-----------------: |
+|   dotenv    |         yes         |
+|    json     |         yes         |
+|    toml     |         yes         |
+|    yaml     |         yes         |
+
+An example command using the default `dotenv` import type.
 
 ```bash
 goss import -f test.env -p /envs/dev -t SecureString
 ```
 
-#### File format support
-| File format | Currently supported |
-| :---------: | ------------------- |
-|   dotenv    | yes                 |
-|    json     | soon!               |
-|    toml     | soon!               |
-|    yaml     | soon!               |
+An example using a toml file
+```bash
+goss import -f test.toml -p /envs/dev -t SecureString --format toml
+```
+
 
 ## Why?
 I made this tool because although **chamber** is an excellent tool - it uses **viper** underneath and the problem with **viper** is that the keys are **CASE INSENSITIVE** which for me was unacceptable. So I decided to *roll-my-own* using the wonderful [**koanf**](https://github.com/knadh/koanf) library to manage the deserialisation of various config files.
